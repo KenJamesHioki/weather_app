@@ -1,0 +1,39 @@
+#container {
+  width: 600px;
+  margin: 50px auto 0;
+  background: pink;
+}
+
+.weather {
+  &__inner {
+    text-align: center;
+  }
+
+  &__title {
+    margin-bottom: 16px;
+  }
+
+  &__description {
+    margin-bottom: 8px;
+  }
+
+  &__search-form {
+    margin-bottom: 16px;
+  }
+
+  &__result {
+    font-size: 20px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &__result-place {
+    font-weight: 700;
+    margin-bottom: 16px;
+    flex-basis: 100%;
+  }
+
+  &-info {
+    flex-basis: 30%;
+  }
+}

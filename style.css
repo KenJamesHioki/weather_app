@@ -1,0 +1,31 @@
+#container {
+  width: 600px;
+  margin: 50px auto 0;
+  background: pink;
+}
+
+.weather__inner {
+  text-align: center;
+}
+.weather__title {
+  margin-bottom: 16px;
+}
+.weather__description {
+  margin-bottom: 8px;
+}
+.weather__search-form {
+  margin-bottom: 16px;
+}
+.weather__result {
+  font-size: 20px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.weather__result-place {
+  font-weight: 700;
+  margin-bottom: 16px;
+  flex-basis: 100%;
+}
+.weather-info {
+  flex-basis: 30%;
+}/*# sourceMappingURL=style.css.map */

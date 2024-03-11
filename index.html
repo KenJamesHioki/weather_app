@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jay's Weather</title>
+  <link rel="stylesheet" href="vendor/reset.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="container">
@@ -12,15 +14,15 @@
         <div class="weather__inner">
           <h1 class="weather__title">天気を調べよう</h1>
           <p class="weather__description">天気を調べたい都市名を入力してください</p>
-          <form action="" class="weather__search">
+          <form action="" class="weather__search-form">
             <input type="text" class="weather__textbox">
             <button class="btn weather__search-btn">検索</button>
           </form>
           <div class="weather__result">
             <p class="weather__result-place">シンガポールの天気</p>
-            <div class="weather__temp">12℃</div>
-            <div class="weather__weather">晴れ</div>
-            <div class="weather__wind">1m/s</div>
+            <div class="weather__temp weather-info">12℃</div>
+            <div class="weather__weather weather-info">晴れ</div>
+            <div class="weather__wind weather-info">1m/s</div>
           </div>
         </div>
       </section>
