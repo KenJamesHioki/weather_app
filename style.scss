@@ -1,7 +1,9 @@
 #container {
   width: 600px;
   margin: 50px auto 0;
-  background: pink;
+  background: rgb(243, 245, 246);
+  padding: 32px;
+  border-radius: 16px;
 }
 
 .weather {
@@ -24,6 +26,7 @@
   &__result {
     font-size: 20px;
     display: flex;
+    justify-content: space-around;
     flex-wrap: wrap;
   }
 
@@ -35,5 +38,22 @@
 
   &-info {
     flex-basis: 30%;
+
+    &-title {
+      background: teal;
+      color: white;
+      font-size: 0.9em;
+      padding: 4px 0;
+    }
+
+    &-data {
+      height: 100px;
+      line-height: 100px;
+      border: 3px solid teal;
+      background: white;
+    }
   }
+
+
 }
+
