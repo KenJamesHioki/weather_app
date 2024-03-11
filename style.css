@@ -1,9 +1,24 @@
+body {
+  background-image: url(images/bg-image.jpeg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
 #container {
-  width: 600px;
-  margin: 50px auto 0;
-  background: rgb(243, 245, 246);
-  padding: 32px;
+  width: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(243, 245, 246, 0.8);
+  padding: 40px 32px;
   border-radius: 16px;
+}
+@media screen and (max-width: 960px) {
+  #container {
+    width: 90%;
+  }
 }
 
 .weather__inner {
@@ -17,6 +32,12 @@
 }
 .weather__search-form {
   margin-bottom: 16px;
+}
+.weather__textbox {
+  padding: 4px 8px;
+}
+.weather__search-btn {
+  padding: 4px 8px;
 }
 .weather__result {
   font-size: 20px;
@@ -42,5 +63,12 @@
   height: 100px;
   line-height: 100px;
   border: 3px solid teal;
-  background: white;
+  background: rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+  font-size: 1.2em;
+}
+@media screen and (max-width: 600px) {
+  .weather-info-data {
+    font-size: 1em;
+  }
 }/*# sourceMappingURL=style.css.map */
