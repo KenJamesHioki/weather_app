@@ -45,7 +45,7 @@ body {
   justify-content: space-around;
   flex-wrap: wrap;
 }
-.weather__result-place {
+.weather__result-location {
   font-weight: 700;
   margin-bottom: 16px;
   flex-basis: 100%;
