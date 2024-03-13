@@ -61,14 +61,32 @@ body {
 }
 .weather-info-data {
   height: 100px;
-  line-height: 100px;
   border: 3px solid teal;
   background: rgba(255, 255, 255, 0.6);
-  font-weight: 700;
-  font-size: 1.2em;
+  text-align: center;
 }
 @media screen and (max-width: 600px) {
   .weather-info-data {
     font-size: 1em;
   }
+}
+.weather-info-icon {
+  display: inline-block;
+  height: 60px;
+  width: 60px;
+}
+.weather-info-main {
+  font-weight: 700;
+  font-size: 1.2em;
+  line-height: 100px;
+}
+.weather-info-sub {
+  font-weight: 600;
+}
+
+#weather .weather-info-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }/*# sourceMappingURL=style.css.map */

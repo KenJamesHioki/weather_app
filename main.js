@@ -72,7 +72,9 @@ class WeatherApp {
     const tempHtml = `
     <div class="weather-info" id="temp">
       <p class="weather-info-title">気温</p>
-      <p class="weather-info-data">${this.weatherInfo.temp}℃</p>
+      <div class="weather-info-data">
+        <p class="weather-info-main">${this.weatherInfo.temp}℃</p>
+      </div>
     </div>
     `
     return tempHtml
@@ -81,8 +83,11 @@ class WeatherApp {
   _renderWeatherInfo() {
     const weatherHtml = `
     <div class="weather-info" id="weather">
-     <p class="weather-info-title">天気</p>
-     <p class="weather-info-data">${this.weatherInfo.weatherDesc}</p>
+      <p class="weather-info-title">天気</p>
+      <div class="weather-info-data">
+       <img class="weather-info-icon" src="https://openweathermap.org/img/wn/${this.weatherInfo.weatherIcon}@2x.png">
+       <p class="weather-info-sub">${this.weatherInfo.weatherDesc}</p>
+      </div>
     </div>
     `
     return weatherHtml;
@@ -91,8 +96,10 @@ class WeatherApp {
   _renderWindInfo() {
     const windHtml = `
     <div class="weather-info" id="wind">
-     <p class="weather-info-title">風速</p>
-     <p class="weather-info-data">${this.weatherInfo.wind}m/s</p>
+      <p class="weather-info-title">風速</p>
+      <div class="weather-info-data">
+        <p class="weather-info-main">${this.weatherInfo.wind}m/s</p>
+      </div>
     </div>
     `
     return windHtml;
