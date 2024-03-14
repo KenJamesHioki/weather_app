@@ -83,6 +83,13 @@ body {
 .weather-info-sub {
   font-weight: 600;
 }
+.weather__error-message {
+  margin-top: 16px;
+}
+.weather__error-message .error-message {
+  font-size: 0.9em;
+  color: rgb(246, 94, 94);
+}
 
 #weather .weather-info-data {
   display: flex;
