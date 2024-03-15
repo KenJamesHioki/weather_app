@@ -9,11 +9,11 @@ class WeatherApp {
   // フォームの送信を発火イベントとする
   _init() {
     const searchForm = document.querySelector('.weather__search-form');
-    searchForm.addEventListener('submit', () => this._updateLocation(event));
+    searchForm.addEventListener('submit', () => this._checkLocation(event));
   }
 
   // ユーザーが入力した都市名を取得しそれをgetCoordinatesに渡す
-  async _updateLocation(event) {
+  async _checkLocation(event) {
     event.preventDefault();
     const locationInput = document.querySelector('.weather__textbox').value;
     // 空の場合は何もしない
@@ -27,7 +27,7 @@ class WeatherApp {
   // 都市名を元に緯度経度をAPIで取得する。緯度経度をgetWeatherに渡す
   async _getCoordinates(location) {
     try {
-      const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=1&appid=${this.apiKey}`);
+      const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${this.apiKey}`);
 
       // レスポンスが正常でない場合は例外を投げる
       if (!coordResponse.ok) {
@@ -45,11 +45,17 @@ class WeatherApp {
         }
       }
       const coordArr = await coordResponse.json();
+      console.log(coordArr);
 
       // 配列が空だった場合は指定した都市の天気情報がなかったと表示
       if (coordArr.length === 0) {
         const noCityHtml = 'お探しの都市の天気情報が見つかりませんでした。<br>別の都市名を入力し、再度お試しください。'
         this._displayError(noCityHtml);
+        return;
+      }
+
+      if (coordArr.length >= 2) {
+        this._getMultiLocationNames(coordArr);
         return;
       }
 
@@ -68,8 +74,70 @@ class WeatherApp {
 
   }
 
+  // 都市の候補が複数ある場合は候補地を配列にまとめる
+  _getMultiLocationNames(coordArr) {
+    const multiLoc = [];
+    coordArr.forEach(location => {
+      if (location.local_names && location.local_names.ja) {
+        const locInfo = {}
+        locInfo.name = location.local_names.ja;
+        locInfo.lat = location.lat;
+        locInfo.lon = location.lon;
+        multiLoc.push(locInfo);
+      } else {
+        const locInfo = {}
+        locInfo.name = location.name;
+        locInfo.lat = location.lat;
+        locInfo.lon = location.lon;
+        multiLoc.push(locInfo);
+      }
+    });
+    // const multiLocUni = [...new Set(multiLoc)];
+    console.log(multiLoc);
+    // console.log(multiLocUni);
+    this._renderMultiLoc(multiLoc);
+  }
+
+  // 複数候補があった場合は表示する
+  _renderMultiLoc(locations) {
+    const ul = document.createElement('ul');
+    ul.classList.add('weather__ul');
+    const multiLocMessage = document.createElement('p');
+    multiLocMessage.classList.add('weather__multi-location-message');
+    multiLocMessage.textContent = '候補が複数見つかりました：'
+    let liHtml = '';
+    locations.forEach(location => {
+      liHtml += `
+      <li class="weather__li" data-lon="${location.lon}" data-lat="${location.lat}"><a href="#">${location.name}</a></li>
+      `
+    });
+    ul.innerHTML = liHtml;
+    console.log(ul);
+
+    this._resetHtml();
+    const multiLocElm = document.querySelector('.weather__multi-locations');
+    multiLocElm.appendChild(multiLocMessage);
+    multiLocElm.appendChild(ul);
+    this._chooseLocation();
+  }
+
+  _chooseLocation() {
+    const weatherLis = document.querySelectorAll('.weather__li');
+    console.log(weatherLis);
+    weatherLis.forEach(li => {
+      console.log(li);
+      const liLat = li.dataset.lat;
+      const liLon = li.dataset.lon;
+      li.addEventListener('click',this._getWeather.bind(this, {
+        lat: liLat,
+        lon: liLon,
+      }));  ////ここを変更する必要あり
+    });
+  }
+
   // 緯度経度を元に天気情報をAPIで取得する。気温、天気、風速を格納。
   async _getWeather(coordinates) {
+    console.log(coordinates);
     try {
       const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}&units=metric&lang=ja`);
 
@@ -109,6 +177,7 @@ class WeatherApp {
   }
 
   _renderWeatherInfos() {
+    this._resetHtml();
     const weatherResult = document.querySelector('.weather__result');
     const locationHtml = this._renderResultLocation();
     const tempHtml = this._renderTempInfo();
@@ -173,6 +242,13 @@ class WeatherApp {
     `
     const weatherResult = document.querySelector('.weather__result');
     weatherResult.innerHTML = errorMessHtml;
+  }
+
+  _resetHtml(){
+    const multiLocEml = document.querySelector('.weather__multi-locations');
+    const resultElm =  document.querySelector('.weather__result');
+    multiLocEml.innerHTML = '';
+    resultElm.innerHTML = '';
   }
 
 
