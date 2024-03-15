@@ -49,6 +49,23 @@ body {
     padding: 4px 8px;
   }
 
+  &__multi-locations {
+
+  }
+
+  &__ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  &__li + li {
+    margin-left: 8px;
+  }
+
   &__result {
     font-size: 20px;
     display: flex;
