@@ -128,7 +128,7 @@ class WeatherApp {
       console.log(li);
       const liLat = li.dataset.lat;
       const liLon = li.dataset.lon;
-      li.addEventListener('click',this._getWeather.bind(this, {
+      li.addEventListener('click', this._getWeather.bind(this, {
         lat: liLat,
         lon: liLon,
       }));  ////ここを変更する必要あり
@@ -212,8 +212,10 @@ class WeatherApp {
     <div class="weather-info" id="weather">
       <p class="weather-info-title">天気</p>
       <div class="weather-info-data">
-       <img class="weather-info-icon" src="https://openweathermap.org/img/wn/${this.weatherInfo.weatherIcon}@2x.png">
-       <p class="weather-info-sub">${this.weatherInfo.weatherDesc}</p>
+        <div class="weather-info-icon-container">
+          <img class="weather-info-icon" src="https://openweathermap.org/img/wn/${this.weatherInfo.weatherIcon}@2x.png">
+        </div>
+        <p class="weather-info-sub">${this.weatherInfo.weatherDesc}</p>
       </div>
     </div>
     `
@@ -244,9 +246,9 @@ class WeatherApp {
     weatherResult.innerHTML = errorMessHtml;
   }
 
-  _resetHtml(){
+  _resetHtml() {
     const multiLocEml = document.querySelector('.weather__multi-locations');
-    const resultElm =  document.querySelector('.weather__result');
+    const resultElm = document.querySelector('.weather__result');
     multiLocEml.innerHTML = '';
     resultElm.innerHTML = '';
   }
