@@ -27,6 +27,7 @@ class WeatherApp {
   // 都市名を元に緯度経度をAPIで取得する。緯度経度をgetWeatherに渡す
   async _getCoordinates(location) {
     try {
+      this._startLoading();
       const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${this.apiKey}`);
 
       // レスポンスが正常でない場合は例外を投げる
@@ -70,6 +71,8 @@ class WeatherApp {
       const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
       this._displayError(errorHtml);
       return;
+    } finally {
+      this._endLoading();
     }
 
   }
@@ -139,6 +142,7 @@ class WeatherApp {
   async _getWeather(coordinates) {
     console.log(coordinates);
     try {
+      this._startLoading();
       const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}&units=metric&lang=ja`);
 
       // レスポンスが正常でない場合は例外を投げる
@@ -173,6 +177,8 @@ class WeatherApp {
       const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
       this._displayError(errorHtml);
       return;
+    } finally {
+      this._endLoading();
     }
   }
 
@@ -251,6 +257,16 @@ class WeatherApp {
     const resultElm = document.querySelector('.weather__result');
     multiLocEml.innerHTML = '';
     resultElm.innerHTML = '';
+  }
+
+  _startLoading(){
+    const loader = document.querySelector('.loader');
+    loader.classList.add('loading');
+  }
+
+  _endLoading() {
+    const loader = document.querySelector('.loader');
+    loader.classList.remove('loading');
   }
 
 
