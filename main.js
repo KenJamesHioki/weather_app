@@ -18,7 +18,6 @@ class WeatherApp {
     const locationInput = document.querySelector('.weather__textbox').value;
     // 空の場合は何もしない
     if (!locationInput) {
-      console.log('empty');
       return;
     }
     await this._getCoordinates(locationInput);
@@ -46,7 +45,6 @@ class WeatherApp {
         }
       }
       const coordArr = await coordResponse.json();
-      console.log(coordArr);
 
       // 配列が空だった場合は指定した都市の天気情報がなかったと表示
       if (coordArr.length === 0) {
@@ -95,10 +93,18 @@ class WeatherApp {
         multiLoc.push(locInfo);
       }
     });
-    // const multiLocUni = [...new Set(multiLoc)];
-    console.log(multiLoc);
-    // console.log(multiLocUni);
-    this._renderMultiLoc(multiLoc);
+
+    const multiLocMap = Array.from(new Map(multiLoc.map(obj => [obj.name, obj])));
+    const multiLocUni = [];
+    multiLocMap.forEach(loc => {
+      multiLocUni.push(loc[1]);
+    });
+
+    if (multiLocUni.length === 1) {
+      this._getWeather(multiLocUni);
+    } else {
+      this._renderMultiLoc(multiLocUni);
+    }
   }
 
   // 複数候補があった場合は表示する
@@ -115,8 +121,6 @@ class WeatherApp {
       `
     });
     ul.innerHTML = liHtml;
-    console.log(ul);
-
     this._resetHtml();
     const multiLocElm = document.querySelector('.weather__multi-locations');
     multiLocElm.appendChild(multiLocMessage);
@@ -126,9 +130,7 @@ class WeatherApp {
 
   _chooseLocation() {
     const weatherLis = document.querySelectorAll('.weather__li');
-    console.log(weatherLis);
     weatherLis.forEach(li => {
-      console.log(li);
       const liLat = li.dataset.lat;
       const liLon = li.dataset.lon;
       li.addEventListener('click', this._getWeather.bind(this, {
@@ -140,7 +142,6 @@ class WeatherApp {
 
   // 緯度経度を元に天気情報をAPIで取得する。気温、天気、風速を格納。
   async _getWeather(coordinates) {
-    console.log(coordinates);
     try {
       this._startLoading();
       const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.apiKey}&units=metric&lang=ja`);
@@ -162,7 +163,6 @@ class WeatherApp {
       }
 
       const weatherObj = await weatherResponse.json();
-      console.log(weatherObj);
       this.weatherInfo = {
         temp: weatherObj.main.temp, //気温（摂氏）
         location: weatherObj.name, //都市名
@@ -241,6 +241,7 @@ class WeatherApp {
   }
 
   _displayError(errorHtml) {
+    this._resetHtml();
     const errorMessHtml = `
     <div class="weather__error-message">
       <p class="error-message">
