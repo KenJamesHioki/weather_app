@@ -33,11 +33,11 @@ class WeatherApp {
       if (!coordResponse.ok) {
         switch (coordResponse.status) {
           case 401:
-            throw new Error('401 error');
+            throw new Error400('401 error');
           case 404:
-            throw new Error('404 error');
+            throw new Error400('404 error');
           case 429:
-            throw new Error('429 error');
+            throw new Error400('429 error');
           case 500, 502, 503, 504:
             throw new Error('500~504 error');
           default:
@@ -66,9 +66,15 @@ class WeatherApp {
 
     } catch (e) {
       console.error(`${e}`);
-      const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
-      this._displayError(errorHtml);
-      return;
+      if (e instanceof Error400) {
+        const errorHtml = '天気情報が取得できませんでした。';
+        this._displayError(errorHtml);
+        return;
+      } else {
+        const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
+        this._displayError(errorHtml);
+        return;
+      }
     } finally {
       this._endLoading();
     }
@@ -260,7 +266,7 @@ class WeatherApp {
     resultElm.innerHTML = '';
   }
 
-  _startLoading(){
+  _startLoading() {
     const loader = document.querySelector('.loader');
     loader.classList.add('loading');
   }
