@@ -136,7 +136,7 @@ class WeatherApp {
       li.addEventListener('click', this._getWeather.bind(this, {
         lat: liLat,
         lon: liLon,
-      }));  ////ここを変更する必要あり
+      }));
     });
   }
 
