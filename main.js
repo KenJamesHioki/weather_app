@@ -65,27 +65,21 @@ class WeatherApp {
   // 複数の候補が返って来た場合はユーザーに選択させる方法がベストと考えた
   _getMultiLocationNames(coordArr) {
     const multiLoc = [];
-    coordArr.forEach(location => {
+    coordArr.forEach((location, i) => {
       if (location.local_names && location.local_names.ja) {
-        const locInfo = {}
-        locInfo.name = location.local_names.ja;
-        locInfo.lat = location.lat;
-        locInfo.lon = location.lon;
-        multiLoc.push(locInfo);
+        const locInfo = this._extractLocInfo(location.local_names.ja, location);
+        multiLoc[i] = locInfo;
 
       } else {
-        const locInfo = {}
-        locInfo.name = location.name;
-        locInfo.lat = location.lat;
-        locInfo.lon = location.lon;
-        multiLoc.push(locInfo);
+        const locInfo = this._extractLocInfo(location.name, location);
+        multiLoc[i] = locInfo;
       }
     });
 
     const multiLocMap = Array.from(new Map(multiLoc.map(obj => [obj.name, obj])));
     const multiLocUni = [];
-    multiLocMap.forEach(loc => {
-      multiLocUni.push(loc[1]);
+    multiLocMap.forEach((loc, i) => {
+      multiLocUni[i] = loc[1];
     });
 
     if (multiLocUni.length === 1) {
@@ -93,6 +87,14 @@ class WeatherApp {
 
     } else {
       this._renderMultiLoc(multiLocUni);
+    }
+  }
+
+  _extractLocInfo(locName, locInfo) {
+    return {
+      name: locName,
+      lat: locInfo.lat,
+      lon: locInfo.lon,
     }
   }
 
