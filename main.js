@@ -61,11 +61,10 @@ class WeatherApp {
 
   }
 
-  // APIの仕様で都市名が完全一致しない場合は複数の候補を返してくることがある
-  // 複数の候補が返って来た場合はユーザーに選択させる方法がベストと考えた
   _getMultiLocationNames(coordArr) {
     const multiLoc = [];
     coordArr.forEach((location, i) => {
+      //都市の日本語名が表示可能な場合は日本語名の表示を優先するための分岐
       if (location.local_names && location.local_names.ja) {
         const locInfo = this._extractLocInfo(location.local_names.ja, location);
         multiLoc[i] = locInfo;
