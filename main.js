@@ -29,19 +29,9 @@ class WeatherApp {
 
       // TODO:400系ごとのハンドリングを分ける
       if (!coordResponse.ok) {
-        switch (coordResponse.status) {
-          case 401:
-            throw new Error400('401 error');
-          case 404:
-            throw new Error400('404 error');
-          case 429:
-            throw new Error400('429 error');
-          case 500, 502, 503, 504:
-            throw new Error('500~504 error');
-          default:
-            throw new Error('somthing went wrong');
-        }
+        this._throwError(coordResponse.status);
       }
+
       const coordArr = await coordResponse.json();
 
       if (coordArr.length === 0) {
@@ -63,18 +53,7 @@ class WeatherApp {
       await this._getWeather(this.coordinates);
 
     } catch (e) {
-      console.error(`${e}`);
-
-      if (e instanceof Error400) {
-        const errorHtml = '天気情報が取得できませんでした。';
-        this._displayError(errorHtml);
-        return;
-
-      } else {
-        const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
-        this._displayError(errorHtml);
-        return;
-      }
+      this._catchError(e);
 
     } finally {
       this._endLoading();
@@ -160,18 +139,7 @@ class WeatherApp {
 
       // TODO:400系ごとのハンドリングを分ける
       if (!weatherResponse.ok) {
-        switch (weatherResponse.status) {
-          case 401:
-            throw new Error('401 error');
-          case 404:
-            throw new Error('404 error');
-          case 429:
-            throw new Error('429 error');
-          case 500, 502, 503, 504:
-            throw new Error('500~504 error');
-          default:
-            throw new Error('somthing went wrong');
-        }
+        this._throwError(weatherResponse.status)
       }
 
       const weatherObj = await weatherResponse.json();
@@ -185,10 +153,7 @@ class WeatherApp {
       this._renderWeatherInfos();
 
     } catch (e) {
-      console.error(`${e}`);
-      const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
-      this._displayError(errorHtml);
-      return;
+      this._catchError(e);
 
     } finally {
       this._endLoading();
@@ -247,6 +212,36 @@ class WeatherApp {
       </div>
     </div>
     `;
+  }
+
+  _throwError(status) {
+    switch (status) {
+      case 401:
+        throw new Error400('エラーコード：401');
+      case 404:
+        throw new Error400('エラーコード：404');
+      case 429:
+        throw new Error400('エラーコード：429');
+      case 500, 502, 503, 504:
+        throw new Error('エラーコード：500~504');
+      default:
+        throw new Error('処理ができませんでした。');
+    }
+  }
+
+  _catchError(e) {
+    console.error(`${e}`);
+
+    if (e instanceof Error400) {
+      const errorHtml = `天気情報が取得できませんでした。(${e.message})`;
+      this._displayError(errorHtml);
+      return;
+
+    } else {
+      const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
+      this._displayError(errorHtml);
+      return;
+    }
   }
 
   _displayError(errorHtml) {
