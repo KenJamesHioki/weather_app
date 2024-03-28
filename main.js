@@ -63,15 +63,13 @@ class WeatherApp {
 
   _getMultiLocationNames(coordArr) {
     const multiLoc = coordArr.map(location => this._extractLocInfo(location));
-    console.log(multiLoc);
-    const multiLocMap = Array.from(new Map(multiLoc.map(obj => [obj.name, obj])));
-    const multiLocUni = multiLocMap.map(location => location[1]);
+    const multiLocUnique = this._removeDuplicateLocs(multiLoc)
 
-    if (multiLocUni.length === 1) {
-      this._getWeather(multiLocUni);
+    if (multiLocUnique.length === 1) {
+      this._getWeather(multiLocUnique);
 
     } else {
-      this._renderMultiLoc(multiLocUni);
+      this._renderMultiLoc(multiLocUnique);
     }
   }
 
@@ -86,6 +84,11 @@ class WeatherApp {
       locInfo.name = location.local_names.ja;
     }
     return locInfo;
+  }
+
+  _removeDuplicateLocs(multiLoc) {
+    const multiLocMap = Array.from(new Map(multiLoc.map(location => [location.name, location])));
+    return multiLocMap.map(location => location[1]);
   }
 
   _renderMultiLoc(locations) {
