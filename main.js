@@ -26,7 +26,6 @@ class WeatherApp {
       this._startLoading();
       const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
 
-      // TODO:400系ごとのハンドリングを分ける
       if (!coordResponse.ok) {
         this._throwError(coordResponse.status);
       }
@@ -131,7 +130,6 @@ class WeatherApp {
 
       const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
 
-      // TODO:400系ごとのハンドリングを分ける
       if (!weatherResponse.ok) {
         this._throwError(weatherResponse.status)
       }
@@ -208,6 +206,7 @@ class WeatherApp {
     `;
   }
 
+  //TODOエラー系のメソッドはWeatherAppクラスから出せそう
   _throwError(status) {
     switch (status) {
       case 401:
@@ -223,6 +222,7 @@ class WeatherApp {
     }
   }
 
+  //TODOエラー系のメソッドはWeatherAppクラスから出せそう
   _catchError(e) {
     console.error(`${e}`);
 
@@ -238,6 +238,7 @@ class WeatherApp {
     }
   }
 
+  //TODOエラー系のメソッドはWeatherAppクラスから出せそう
   _displayError(errorHtml) {
     this._resetHtml();
     const errorMessHtml = `
