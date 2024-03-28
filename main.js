@@ -1,6 +1,5 @@
 class WeatherApp {
   constructor() {
-    this.APIKEY = '16806dd9a591b25a5beebeb69dd718b8';
     this.coordinates = {};
     this.weatherInfo = {};
     this._init();
@@ -25,7 +24,7 @@ class WeatherApp {
   async _getCoordinates(location) {
     try {
       this._startLoading();
-      const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${this.APIKEY}`);
+      const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
 
       // TODO:400系ごとのハンドリングを分ける
       if (!coordResponse.ok) {
@@ -130,7 +129,7 @@ class WeatherApp {
     try {
       this._startLoading();
 
-      const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${this.APIKEY}&units=metric&lang=ja`);
+      const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
 
       // TODO:400系ごとのハンドリングを分ける
       if (!weatherResponse.ok) {
@@ -269,5 +268,7 @@ class WeatherApp {
     loader.classList.remove('loading');
   }
 }
+
+const APIKEY = CONFIG.APIKEY;
 
 new WeatherApp();
