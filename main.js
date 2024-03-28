@@ -62,16 +62,8 @@ class WeatherApp {
   }
 
   _getMultiLocationNames(coordArr) {
-    const multiLoc = coordArr.map(location => {
-      //都市の日本語名が表示可能な場合は日本語名の表示を優先するための分岐
-      if (location.local_names && location.local_names.ja) {
-        return this._extractLocInfo(location.local_names.ja, location);
-
-      } else {
-        return this._extractLocInfo(location.name, location);
-      }
-    });
-
+    const multiLoc = coordArr.map(location => this._extractLocInfo(location));
+    console.log(multiLoc);
     const multiLocMap = Array.from(new Map(multiLoc.map(obj => [obj.name, obj])));
     const multiLocUni = multiLocMap.map(location => location[1]);
 
@@ -83,12 +75,17 @@ class WeatherApp {
     }
   }
 
-  _extractLocInfo(locName, locInfo) {
-    return {
-      name: locName,
-      lat: locInfo.lat,
-      lon: locInfo.lon,
+  //都市の日本語名が表示可能な場合は日本語名の表示を優先し、なければ英語名を表示する
+  _extractLocInfo(location) {
+    const locInfo = {
+      name: location.name,
+      lat: location.lat,
+      lon: location.lon,
     }
+    if (location.local_names && location.local_names.ja) {
+      locInfo.name = location.local_names.ja;
+    }
+    return locInfo;
   }
 
   _renderMultiLoc(locations) {
