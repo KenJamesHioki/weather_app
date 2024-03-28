@@ -1,50 +1,44 @@
 class WeatherApp {
   constructor() {
     this.coordinates = {};
-    this.weatherInfo = {};
+    this.weatherInfos = {};
     this._init();
   }
 
   _init() {
     const searchForm = document.querySelector('.weather__search-form');
-    searchForm.addEventListener('submit', () => this._checkLocation(event));
-  }
-
-  async _checkLocation(event) {
-    event.preventDefault();
-    const locationInput = document.querySelector('.weather__textbox').value;
-
-    if (!locationInput) {
-      return;
-    }
-
-    await this._getCoordinates(locationInput);
+    searchForm.addEventListener('submit', event => {
+      const locationInput = document.querySelector('.weather__textbox').value;
+      event.preventDefault();
+      if (!locationInput) return;
+      this._getCoordinates(locationInput);
+    });
   }
 
   async _getCoordinates(location) {
     try {
-      this._startLoading();
+      this._displayLoader();
       //TODO：Fetchを別のメソッドに切り出す
-      const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
+      const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
 
-      if (!coordResponse.ok) {
-        this._errorThower(coordResponse.status);
+      if (!response.ok) {
+        this._errorThower(response.status);
       }
 
-      const coordArr = await coordResponse.json();
+      const locationDetailsArray = await response.json();
 
-      if (coordArr.length === 0) {
+      if (locationDetailsArray.length === 0) {
         throw new ErrorNoCity('都市が見つかりませんでした。')
       }
 
-      if (coordArr.length >= 2) {
-        this._getMultiLocationNames(coordArr);
+      if (locationDetailsArray.length >= 2) {
+        this._getAllLocationNames(locationDetailsArray);
         return;
       }
 
       this.coordinates = {
-        lat: coordArr[0].lat,
-        lon: coordArr[0].lon,
+        lat: locationDetailsArray[0].lat,
+        lon: locationDetailsArray[0].lon,
       }
 
       await this._getWeather(this.coordinates);
@@ -54,48 +48,49 @@ class WeatherApp {
       new ErrorHandler(e);
 
     } finally {
-      this._endLoading();
+      this._hideLoader();
     }
 
   }
 
-  _getMultiLocationNames(coordArr) {
-    const multiLoc = coordArr.map(location => this._extractLocInfo(location));
-    const multiLocUnique = this._removeDuplicateLocs(multiLoc)
+  _getAllLocationNames(coordArr) {
+    const allLocations = coordArr.map(location => this._extractLocationInfo(location));
+    const uniqueLocations = this._discardIdenticalNamedLocations(allLocations)
 
-    if (multiLocUnique.length === 1) {
-      this._getWeather(multiLocUnique);
+    if (uniqueLocations.length === 1) {
+      this._getWeather(uniqueLocations);
 
     } else {
-      this._renderMultiLoc(multiLocUnique);
+      this._renderLocationSuggestions(uniqueLocations);
     }
   }
 
   //都市の日本語名が表示可能な場合は日本語名の表示を優先し、なければ英語名を表示する
-  _extractLocInfo(location) {
-    const locInfo = {
+  _extractLocationInfo(location) {
+    const locationInfo = {
       name: location.name,
       lat: location.lat,
       lon: location.lon,
     }
     if (location.local_names && location.local_names.ja) {
-      locInfo.name = location.local_names.ja;
+      locationInfo.name = location.local_names.ja;
     }
-    return locInfo;
+    return locationInfo;
   }
 
-  _removeDuplicateLocs(multiLoc) {
-    const multiLocMap = Array.from(new Map(multiLoc.map(location => [location.name, location])));
-    return multiLocMap.map(location => location[1]);
+  //重複した都市名を排除する
+  _discardIdenticalNamedLocations(multiLoc) {
+    const uniqueLocationsMap = Array.from(new Map(multiLoc.map(location => [location.name, location])));
+    return uniqueLocationsMap.map(location => location[1]);
   }
 
-  _renderMultiLoc(locations) {
+  _renderLocationSuggestions(locations) {
     const ul = document.createElement('ul');
     ul.classList.add('weather__ul');
 
-    const multiLocMessage = document.createElement('p');
-    multiLocMessage.classList.add('weather__multi-location-message');
-    multiLocMessage.textContent = '候補が複数見つかりました：'
+    const title = document.createElement('p');
+    title.classList.add('weather__multi-location-message');
+    title.textContent = '候補が複数見つかりました：'
 
     let liHtml = '';
     locations.forEach(location => {
@@ -106,41 +101,42 @@ class WeatherApp {
 
     ul.innerHTML = liHtml;
     this._resetHtml();
-    const multiLocElm = document.querySelector('.weather__multi-locations');
-    multiLocElm.appendChild(multiLocMessage);
-    multiLocElm.appendChild(ul);
-    this._chooseLocation();
+    const parentElm = document.querySelector('.weather__multi-locations');
+    parentElm.appendChild(title);
+    parentElm.appendChild(ul);
+
+    this._chooseSuggestion();
   }
 
-  _chooseLocation() {
-    const weatherLis = document.querySelectorAll('.weather__li');
-    weatherLis.forEach(li => {
-      const liLat = li.dataset.lat;
-      const liLon = li.dataset.lon;
-      li.addEventListener('click', this._getWeather.bind(this, {
-        lat: liLat,
-        lon: liLon,
+  _chooseSuggestion() {
+    const suggestions = document.querySelectorAll('.weather__li');
+    suggestions.forEach(suggestion => {
+      const suggestionLat = suggestion.dataset.lat;
+      const suggestionLon = suggestion.dataset.lon;
+      suggestion.addEventListener('click', this._getWeather.bind(this, {
+        lat: suggestionLat,
+        lon: suggestionLon,
       }));
     });
   }
 
   async _getWeather(coordinates) {
     try {
-      this._startLoading();
+      this._displayLoader();
 
-      const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
 
-      if (!weatherResponse.ok) {
-        this._errorThower(weatherResponse.status)
+      if (!response.ok) {
+        this._errorThower(response.status)
       }
 
-      const weatherObj = await weatherResponse.json();
-      this.weatherInfo = {
-        temp: weatherObj.main.temp,
-        location: weatherObj.name,
-        weatherDesc: weatherObj.weather[0].description,
-        weatherIcon: weatherObj.weather[0].icon,
-        wind: weatherObj.wind.speed,
+      const weatherDetails = await response.json();
+      this.weatherInfos = {
+        temperature: weatherDetails.main.temperature,
+        location: weatherDetails.name,
+        weatherDescription: weatherDetails.weather[0].description,
+        weatherIconId: weatherDetails.weather[0].icon,
+        wind: weatherDetails.wind.speed,
       }
       this._renderWeatherInfos();
 
@@ -149,7 +145,7 @@ class WeatherApp {
       new ErrorHandler(e);
 
     } finally {
-      this._endLoading();
+      this._hideLoader();
     }
   }
 
@@ -157,26 +153,26 @@ class WeatherApp {
     this._resetHtml();
     const weatherResult = document.querySelector('.weather__result');
     const locationHtml = this._createLocationHtml();
-    const tempHtml = this._createTempHtml();
+    const temperatureHtml = this._createTemperatureHtml();
     const weatherHtml = this._createWeatherHtml();
     const windHtml = this._createWindHtml();
-    weatherResult.innerHTML = locationHtml + tempHtml + weatherHtml + windHtml;
+    weatherResult.innerHTML = locationHtml + temperatureHtml + weatherHtml + windHtml;
   }
 
   _createLocationHtml() {
     return `
     <p class="weather__result-location">
-    ${this.weatherInfo.location}の天気
+    ${this.weatherInfos.location}の天気
     </p>
     `;
   }
 
-  _createTempHtml() {
+  _createTemperatureHtml() {
     return `
-    <div class="weather-info" id="temp">
+    <div class="weather-info" id="temperature">
       <p class="weather-info-title">気温</p>
       <div class="weather-info-data">
-        <p class="weather-info-main">${this.weatherInfo.temp}℃</p>
+        <p class="weather-info-main">${this.weatherInfos.temperature}℃</p>
       </div>
     </div>
     `;
@@ -188,9 +184,9 @@ class WeatherApp {
       <p class="weather-info-title">天気</p>
       <div class="weather-info-data">
         <div class="weather-info-icon-container">
-          <img class="weather-info-icon" src="https://openweathermap.org/img/wn/${this.weatherInfo.weatherIcon}@2x.png">
+          <img class="weather-info-icon" src="https://openweathermap.org/img/wn/${this.weatherInfos.weatherIconId}@2x.png">
         </div>
-        <p class="weather-info-sub">${this.weatherInfo.weatherDesc}</p>
+        <p class="weather-info-sub">${this.weatherInfos.weatherDescription}</p>
       </div>
     </div>
     `;
@@ -201,7 +197,7 @@ class WeatherApp {
     <div class="weather-info" id="wind">
       <p class="weather-info-title">風速</p>
       <div class="weather-info-data">
-        <p class="weather-info-main">${this.weatherInfo.wind}m/s</p>
+        <p class="weather-info-main">${this.weatherInfos.wind}m/s</p>
       </div>
     </div>
     `;
@@ -230,12 +226,12 @@ class WeatherApp {
     resultElm.innerHTML = '';
   }
 
-  _startLoading() {
+  _displayLoader() {
     const loader = document.querySelector('.loader');
     loader.classList.add('loading');
   }
 
-  _endLoading() {
+  _hideLoader() {
     const loader = document.querySelector('.loader');
     loader.classList.remove('loading');
   }

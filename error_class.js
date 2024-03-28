@@ -48,7 +48,7 @@ class ErrorHandler {
       </p>
     </div>
     `
-    const weatherResult = document.querySelector('.weather__result');
-    weatherResult.innerHTML = errorMessHtml;
+    const resultElm = document.querySelector('.weather__result');
+    resultElm.innerHTML = errorMessHtml;
   }
 }
