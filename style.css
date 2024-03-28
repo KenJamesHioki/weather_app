@@ -108,10 +108,22 @@ body {
   justify-content: space-around;
   flex-wrap: wrap;
 }
+@media screen and (max-width: 600px) {
+  .weather__result {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
 .weather__result-location {
   font-weight: 700;
   margin-bottom: 16px;
   flex-basis: 100%;
+}
+@media screen and (max-width: 600px) {
+  .weather__result-location {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+  }
 }
 .weather-info {
   flex-basis: 30%;
@@ -127,11 +139,6 @@ body {
   border: 3px solid teal;
   background: rgba(178, 229, 229, 0.8);
   text-align: center;
-}
-@media screen and (max-width: 600px) {
-  .weather-info-data {
-    font-size: 1em;
-  }
 }
 .weather-info-icon-container {
   display: inline-block;

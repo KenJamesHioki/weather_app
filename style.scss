@@ -111,12 +111,20 @@ body {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
+    @media screen and (max-width: 600px) {
+      flex-direction: column;
+      gap: 16px;
+    }
   }
 
   &__result-location {
     font-weight: 700;
     margin-bottom: 16px;
     flex-basis: 100%;
+    @media screen and (max-width: 600px) {
+      font-size: 0.9em;
+      margin-bottom: 8px;
+    }
   }
 
   &-info {
@@ -134,10 +142,6 @@ body {
       border: 3px solid $cPrime;
       background: rgba(178, 229, 229, 0.8);
       text-align: center;
-
-      @media screen and (max-width: 600px) {
-        font-size: 1em;
-      }
     }
 
     &-icon-container {
