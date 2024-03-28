@@ -27,15 +27,13 @@ class WeatherApp {
       const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
 
       if (!coordResponse.ok) {
-        this._throwError(coordResponse.status);
+        this._errorThower(coordResponse.status);
       }
 
       const coordArr = await coordResponse.json();
 
       if (coordArr.length === 0) {
-        const noCityHtml = 'お探しの都市の天気情報が見つかりませんでした。<br>別の都市名を入力し、再度お試しください。'
-        this._displayError(noCityHtml);
-        return;
+        throw new ErrorNoCity('都市が見つかりませんでした。')
       }
 
       if (coordArr.length >= 2) {
@@ -51,7 +49,8 @@ class WeatherApp {
       await this._getWeather(this.coordinates);
 
     } catch (e) {
-      this._catchError(e);
+      this._resetHtml();
+      new ErrorHandler(e);
 
     } finally {
       this._endLoading();
@@ -131,7 +130,7 @@ class WeatherApp {
       const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
 
       if (!weatherResponse.ok) {
-        this._throwError(weatherResponse.status)
+        this._errorThower(weatherResponse.status)
       }
 
       const weatherObj = await weatherResponse.json();
@@ -145,7 +144,8 @@ class WeatherApp {
       this._renderWeatherInfos();
 
     } catch (e) {
-      this._catchError(e);
+      this._resetHtml();
+      new ErrorHandler(e);
 
     } finally {
       this._endLoading();
@@ -207,7 +207,7 @@ class WeatherApp {
   }
 
   //TODOエラー系のメソッドはWeatherAppクラスから出せそう
-  _throwError(status) {
+  _errorThower(status) {
     switch (status) {
       case 401:
         throw new Error400('エラーコード：401');
@@ -220,36 +220,6 @@ class WeatherApp {
       default:
         throw new Error('処理ができませんでした。');
     }
-  }
-
-  //TODOエラー系のメソッドはWeatherAppクラスから出せそう
-  _catchError(e) {
-    console.error(`${e}`);
-
-    if (e instanceof Error400) {
-      const errorHtml = `天気情報が取得できませんでした。(${e.message})`;
-      this._displayError(errorHtml);
-      return;
-
-    } else {
-      const errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
-      this._displayError(errorHtml);
-      return;
-    }
-  }
-
-  //TODOエラー系のメソッドはWeatherAppクラスから出せそう
-  _displayError(errorHtml) {
-    this._resetHtml();
-    const errorMessHtml = `
-    <div class="weather__error-message">
-      <p class="error-message">
-      ${errorHtml}
-      </p>
-    </div>
-    `
-    const weatherResult = document.querySelector('.weather__result');
-    weatherResult.innerHTML = errorMessHtml;
   }
 
   _resetHtml() {
