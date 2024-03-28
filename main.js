@@ -24,6 +24,7 @@ class WeatherApp {
   async _getCoordinates(location) {
     try {
       this._startLoading();
+      //TODO：Fetchを別のメソッドに切り出す
       const coordResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
 
       if (!coordResponse.ok) {
@@ -155,14 +156,14 @@ class WeatherApp {
   _renderWeatherInfos() {
     this._resetHtml();
     const weatherResult = document.querySelector('.weather__result');
-    const locationHtml = this._renderResultLocation();
-    const tempHtml = this._renderTempInfo();
-    const weatherHtml = this._renderWeatherInfo();
-    const windHtml = this._renderWindInfo();
+    const locationHtml = this._createLocationHtml();
+    const tempHtml = this._createTempHtml();
+    const weatherHtml = this._createWeatherHtml();
+    const windHtml = this._createWindHtml();
     weatherResult.innerHTML = locationHtml + tempHtml + weatherHtml + windHtml;
   }
 
-  _renderResultLocation() {
+  _createLocationHtml() {
     return `
     <p class="weather__result-location">
     ${this.weatherInfo.location}の天気
@@ -170,7 +171,7 @@ class WeatherApp {
     `;
   }
 
-  _renderTempInfo() {
+  _createTempHtml() {
     return `
     <div class="weather-info" id="temp">
       <p class="weather-info-title">気温</p>
@@ -181,7 +182,7 @@ class WeatherApp {
     `;
   }
 
-  _renderWeatherInfo() {
+  _createWeatherHtml() {
     return `
     <div class="weather-info" id="weather">
       <p class="weather-info-title">天気</p>
@@ -195,7 +196,7 @@ class WeatherApp {
     `;
   }
 
-  _renderWindInfo() {
+  _createWindHtml() {
     return `
     <div class="weather-info" id="wind">
       <p class="weather-info-title">風速</p>
