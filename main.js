@@ -1,3 +1,5 @@
+//TODO:変数、メソッドをプライベート化するのかが中途半端になっている。意思決定をして修正する。
+
 class WeatherApp {
   constructor(locationInput) {
     this.locationInput = locationInput;
@@ -23,10 +25,10 @@ class WeatherApp {
   async _fetchLocationDetails(location) {
     const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
     if (!response.ok) {
-      this._errorThower(response.status);
+      this._throwNewError(response.status);
     }
-    const result = await response.json();
-    return result;
+
+    return await response.json();
   }
 
   //もうちょっといいメソッド名がありそう
@@ -35,7 +37,7 @@ class WeatherApp {
       throw new ErrorNoCity('都市が見つかりませんでした。')
     }
 
-    if(locationDetails.length === 1) {
+    if (locationDetails.length === 1) {
       const coordinates = {
         lat: locationDetails[0].lat,
         lon: locationDetails[0].lon,
@@ -49,7 +51,7 @@ class WeatherApp {
 
       if (uniqueLocations.length === 1) {
         this._getWeather(uniqueLocations);
-  
+
       } else {
         this._renderLocationSuggestions(uniqueLocations);
       }
@@ -70,12 +72,14 @@ class WeatherApp {
     if (location.local_names && location.local_names.ja) {
       locationInfo.name = location.local_names.ja;
     }
+
     return locationInfo;
   }
 
   //都市名が重複してAPIから返却される場合があるので、事前に重複を排除する
   _removeDuplicateLocations(allLocations) {
     const uniqueLocations = Array.from(new Map(allLocations.map(location => [location.name, location])));
+
     return uniqueLocations.map(location => location[1]);
   }
 
@@ -100,41 +104,26 @@ class WeatherApp {
     parentElm.appendChild(title);
     parentElm.appendChild(ul);
 
+    //TODO:ここにrenderをするメソッドないにchooseSuggestionsがあるのは違和感。改善できるか検討。
     this._chooseSuggestion();
   }
 
   _chooseSuggestion() {
     const suggestions = document.querySelectorAll('.weather__li');
     suggestions.forEach(suggestion => {
-      const suggestionLat = suggestion.dataset.lat;
-      const suggestionLon = suggestion.dataset.lon;
       suggestion.addEventListener('click', this._getWeather.bind(this, {
-        lat: suggestionLat,
-        lon: suggestionLon,
+        lat: suggestion.dataset.lat,
+        lon: suggestion.dataset.lon,
       }));
     });
   }
 
   async _getWeather(coordinates) {
+    this._displayLoader();
+
     try {
-      this._displayLoader();
-
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
-
-      if (!response.ok) {
-        this._errorThower(response.status)
-      }
-
-      const weatherDetails = await response.json();
-      console.log(weatherDetails);
-      this.weatherInfos = {
-        temperature: weatherDetails.main.temp,
-        location: weatherDetails.name,
-        weatherDescription: weatherDetails.weather[0].description,
-        weatherIconId: weatherDetails.weather[0].icon,
-        wind: weatherDetails.wind.speed,
-      }
-      this._renderWeatherInfos();
+      const weatherDetails = await this._fetchWeatherDetails(coordinates);
+      this._renderWeatherInfos(weatherDetails);
 
     } catch (e) {
       this._resetHtml();
@@ -145,62 +134,79 @@ class WeatherApp {
     }
   }
 
-  _renderWeatherInfos() {
-    this._resetHtml();
+  async _fetchWeatherDetails(coordinates) {
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
+    if (!response.ok) {
+      this._throwNewError(response.status)
+    }
+
+    return await response.json();
+  }
+
+  _renderWeatherInfos(weatherDetails) {
+    const weatherInfos = {
+      temperature: weatherDetails.main.temp,
+      location: weatherDetails.name,
+      description: weatherDetails.weather[0].description,
+      iconId: weatherDetails.weather[0].icon,
+      wind: weatherDetails.wind.speed,
+    }
     const weatherResult = document.querySelector('.weather__result');
-    const locationHtml = this._createLocationHtml();
-    const temperatureHtml = this._createTemperatureHtml();
-    const weatherHtml = this._createWeatherHtml();
-    const windHtml = this._createWindHtml();
+    const locationHtml = this._createLocationHtml(weatherInfos.location);
+    const temperatureHtml = this._createTemperatureHtml(weatherInfos.temperature);
+    const weatherHtml = this._createWeatherHtml(weatherInfos.description, weatherInfos.iconId);
+    const windHtml = this._createWindHtml(weatherInfos.wind);
+
+    this._resetHtml();
     weatherResult.innerHTML = locationHtml + temperatureHtml + weatherHtml + windHtml;
   }
 
-  _createLocationHtml() {
+  _createLocationHtml(locationName) {
     return `
     <p class="weather__result-location">
-    ${this.weatherInfos.location}の天気
+    ${locationName}の天気
     </p>
     `;
   }
 
-  _createTemperatureHtml() {
+  _createTemperatureHtml(temperature) {
     return `
     <div class="weather-info" id="temperature">
       <p class="weather-info-title">気温</p>
       <div class="weather-info-data">
-        <p class="weather-info-main">${this.weatherInfos.temperature}℃</p>
+        <p class="weather-info-main">${temperature}℃</p>
       </div>
     </div>
     `;
   }
 
-  _createWeatherHtml() {
+  _createWeatherHtml(description, icon) {
     return `
     <div class="weather-info" id="weather">
       <p class="weather-info-title">天気</p>
       <div class="weather-info-data">
         <div class="weather-info-icon-container">
-          <img class="weather-info-icon" src="https://openweathermap.org/img/wn/${this.weatherInfos.weatherIconId}@2x.png">
+          <img class="weather-info-icon" src="https://openweathermap.org/img/wn/${icon}@2x.png">
         </div>
-        <p class="weather-info-sub">${this.weatherInfos.weatherDescription}</p>
+        <p class="weather-info-sub">${description}</p>
       </div>
     </div>
     `;
   }
 
-  _createWindHtml() {
+  _createWindHtml(wind) {
     return `
     <div class="weather-info" id="wind">
       <p class="weather-info-title">風速</p>
       <div class="weather-info-data">
-        <p class="weather-info-main">${this.weatherInfos.wind}m/s</p>
+        <p class="weather-info-main">${wind}m/s</p>
       </div>
     </div>
     `;
   }
 
   //TODOエラー系のメソッドはWeatherAppクラスから出せそう
-  _errorThower(status) {
+  _throwNewError(status) {
     switch (status) {
       case 401:
         throw new Error400('エラーコード：401');
