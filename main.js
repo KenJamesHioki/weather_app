@@ -1,47 +1,15 @@
 class WeatherApp {
-  constructor() {
-    this.coordinates = {};
-    this.weatherInfos = {};
-    this._init();
+  constructor(locationInput) {
+    this.locationInput = locationInput;
+    this._init(this.locationInput);
   }
 
-  _init() {
-    const searchForm = document.querySelector('.weather__search-form');
-    searchForm.addEventListener('submit', event => {
-      const locationInput = document.querySelector('.weather__textbox').value;
-      event.preventDefault();
-      if (!locationInput) return;
-      this._getCoordinates(locationInput);
-    });
-  }
+  async _init(location) {
+    this._displayLoader();
 
-  async _getCoordinates(location) {
     try {
-      this._displayLoader();
-      //TODO：Fetchを別のメソッドに切り出す
-      const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
-
-      if (!response.ok) {
-        this._errorThower(response.status);
-      }
-
-      const locationDetailsArray = await response.json();
-
-      if (locationDetailsArray.length === 0) {
-        throw new ErrorNoCity('都市が見つかりませんでした。')
-      }
-
-      if (locationDetailsArray.length >= 2) {
-        this._getAllLocationNames(locationDetailsArray);
-        return;
-      }
-
-      this.coordinates = {
-        lat: locationDetailsArray[0].lat,
-        lon: locationDetailsArray[0].lon,
-      }
-
-      await this._getWeather(this.coordinates);
+      const locationDetails = await this._fetchLocationDetails(location)
+      this._checkLocationNumbers(locationDetails);
 
     } catch (e) {
       this._resetHtml();
@@ -50,19 +18,46 @@ class WeatherApp {
     } finally {
       this._hideLoader();
     }
-
   }
 
-  _getAllLocationNames(coordArr) {
-    const allLocations = coordArr.map(location => this._extractLocationInfo(location));
-    const uniqueLocations = this._discardIdenticalNamedLocations(allLocations)
-
-    if (uniqueLocations.length === 1) {
-      this._getWeather(uniqueLocations);
-
-    } else {
-      this._renderLocationSuggestions(uniqueLocations);
+  async _fetchLocationDetails(location) {
+    const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
+    if (!response.ok) {
+      this._errorThower(response.status);
     }
+    const result = await response.json();
+    return result;
+  }
+
+  //もうちょっといいメソッド名がありそう
+  _checkLocationNumbers(locationDetails) {
+    if (!locationDetails.length) {
+      throw new ErrorNoCity('都市が見つかりませんでした。')
+    }
+
+    if(locationDetails.length === 1) {
+      const coordinates = {
+        lat: locationDetails[0].lat,
+        lon: locationDetails[0].lon,
+      }
+      this._getWeather(this.coordinates);
+    }
+
+    if (locationDetails.length >= 2) {
+      const allLocations = this._getAllLocation(locationDetails);
+      const uniqueLocations = this._removeDuplicateLocations(allLocations);
+
+      if (uniqueLocations.length === 1) {
+        this._getWeather(uniqueLocations);
+  
+      } else {
+        this._renderLocationSuggestions(uniqueLocations);
+      }
+    }
+  }
+
+  _getAllLocation(locationDetails) {
+    return locationDetails.map(location => this._extractLocationInfo(location));
   }
 
   //都市の日本語名が表示可能な場合は日本語名の表示を優先し、なければ英語名を表示する
@@ -78,10 +73,10 @@ class WeatherApp {
     return locationInfo;
   }
 
-  //重複した都市名を排除する
-  _discardIdenticalNamedLocations(multiLoc) {
-    const uniqueLocationsMap = Array.from(new Map(multiLoc.map(location => [location.name, location])));
-    return uniqueLocationsMap.map(location => location[1]);
+  //都市名が重複してAPIから返却される場合があるので、事前に重複を排除する
+  _removeDuplicateLocations(allLocations) {
+    const uniqueLocations = Array.from(new Map(allLocations.map(location => [location.name, location])));
+    return uniqueLocations.map(location => location[1]);
   }
 
   _renderLocationSuggestions(locations) {
@@ -131,8 +126,9 @@ class WeatherApp {
       }
 
       const weatherDetails = await response.json();
+      console.log(weatherDetails);
       this.weatherInfos = {
-        temperature: weatherDetails.main.temperature,
+        temperature: weatherDetails.main.temp,
         location: weatherDetails.name,
         weatherDescription: weatherDetails.weather[0].description,
         weatherIconId: weatherDetails.weather[0].icon,
@@ -239,4 +235,10 @@ class WeatherApp {
 
 const APIKEY = CONFIG.APIKEY;
 
-new WeatherApp();
+const searchForm = document.querySelector('.weather__search-form');
+searchForm.addEventListener('submit', event => {
+  const locationInput = document.querySelector('.weather__textbox').value;
+  event.preventDefault();
+  if (!locationInput) return;
+  new WeatherApp(locationInput);
+});
