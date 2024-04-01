@@ -105,10 +105,10 @@ class WeatherApp {
     parentElm.appendChild(ul);
 
     //TODO:ここにrenderをするメソッドないにchooseSuggestionsがあるのは違和感。改善できるか検討。
-    this._onSuggestionLocationClick();
+    this._onSuggestedLocationClick();
   }
 
-  _onSuggestionLocationClick() {
+  _onSuggestedLocationClick() {
     const suggestions = document.querySelectorAll('.location-suggestions__li');
     suggestions.forEach(suggestion => {
       suggestion.addEventListener('click', this._getWeather.bind(this, {
