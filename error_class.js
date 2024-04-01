@@ -1,16 +1,33 @@
-class Error400 extends Error {
+Error.prototype.createInnerHtml = function() {
+  return '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
+}
+
+class ClientError extends Error {
   constructor(message) {
     super(message);
-    this.name = "Error400";
-    this.message = message;
+    this.name = "Client Error";
+  }
+
+  createInnerHtml() {
+    return `天気情報が取得できませんでした。`;
+  }
+}
+
+class ServerError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "Server Error";
   }
 }
 
 class ErrorNoCity extends Error {
   constructor(message) {
     super(message);
-    this.name = "ErrorNoCity";
-    this.message = message;
+    this.name = "No City Error";
+  }
+
+  createInnerHtml() {
+    return 'お探しの都市の天気情報が見つかりませんでした。<br>別の都市名を入力し、再度お試しください。';
   }
 }
 
@@ -23,20 +40,9 @@ class ErrorHandler {
   }
 
   #catchError(e) {
-    console.error(`${e}`);
+    console.error(e);
 
-    //TODO：各エラークラスにerrorHtmlプロパティを作り、HTMLの内容を格納しておく。
-    let errorHtml = '';
-    if (e instanceof ErrorNoCity) {
-      errorHtml = 'お探しの都市の天気情報が見つかりませんでした。<br>別の都市名を入力し、再度お試しください。'
-
-    } else if (e instanceof Error400) {
-      errorHtml = `天気情報が取得できませんでした。(${e.message})`;
-
-    } else {
-      errorHtml = '天気情報が取得できませんでした。<br>時間をおいてから再度お試しください。';
-    }
-
+    const errorHtml = e.createInnerHtml();
     this.#displayError(errorHtml);
   }
 

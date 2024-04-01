@@ -208,14 +208,16 @@ class WeatherApp {
   //TODOエラー系のメソッドはWeatherAppクラスから出せそう
   _throwNewError(status) {
     switch (status) {
+      case 400:
+        throw new ClientError('エラーコード：400');
       case 401:
-        throw new Error400('エラーコード：401');
+        throw new ClientError('エラーコード：401');
       case 404:
-        throw new Error400('エラーコード：404');
+        throw new ClientError('エラーコード：404');
       case 429:
-        throw new Error400('エラーコード：429');
+        throw new ClientError('エラーコード：429');
       case 500, 502, 503, 504:
-        throw new Error('エラーコード：500~504');
+        throw new ServerError('エラーコード：500~504');
       default:
         throw new Error('処理ができませんでした。');
     }
