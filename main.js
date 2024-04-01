@@ -42,7 +42,7 @@ class WeatherApp {
         lat: locationDetails[0].lat,
         lon: locationDetails[0].lon,
       }
-      this._getWeather(this.coordinates);
+      this._getWeather(coordinates);
     }
 
     if (locationDetails.length >= 2) {
