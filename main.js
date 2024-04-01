@@ -104,7 +104,6 @@ class WeatherApp {
     parentElm.appendChild(title);
     parentElm.appendChild(ul);
 
-    //TODO:ここにrenderをするメソッドないにchooseSuggestionsがあるのは違和感。改善できるか検討。
     this._onSuggestedLocationClick();
   }
 
