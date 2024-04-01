@@ -85,31 +85,31 @@ class WeatherApp {
 
   _renderLocationSuggestions(locations) {
     const ul = document.createElement('ul');
-    ul.classList.add('weather__ul');
+    ul.classList.add('location-suggestions__ul');
 
     const title = document.createElement('p');
-    title.classList.add('weather__multi-location-message');
+    title.classList.add('location-suggestions__title');
     title.textContent = '候補が複数見つかりました：'
 
     let liHtml = '';
     locations.forEach(location => {
       liHtml += `
-      <li class="weather__li" data-lon="${location.lon}" data-lat="${location.lat}"><a href="#">${location.name}</a></li>
+      <li class="location-suggestions__li" data-lon="${location.lon}" data-lat="${location.lat}"><a href="#">${location.name}</a></li>
       `
     });
 
     ul.innerHTML = liHtml;
     this._resetHtml();
-    const parentElm = document.querySelector('.weather__multi-locations');
+    const parentElm = document.querySelector('.location-suggestions');
     parentElm.appendChild(title);
     parentElm.appendChild(ul);
 
     //TODO:ここにrenderをするメソッドないにchooseSuggestionsがあるのは違和感。改善できるか検討。
-    this._chooseSuggestion();
+    this._onSuggestionLocationClick();
   }
 
-  _chooseSuggestion() {
-    const suggestions = document.querySelectorAll('.weather__li');
+  _onSuggestionLocationClick() {
+    const suggestions = document.querySelectorAll('.location-suggestions__li');
     suggestions.forEach(suggestion => {
       suggestion.addEventListener('click', this._getWeather.bind(this, {
         lat: suggestion.dataset.lat,
@@ -224,7 +224,7 @@ class WeatherApp {
   }
 
   _resetHtml() {
-    const multiLocEml = document.querySelector('.weather__multi-locations');
+    const multiLocEml = document.querySelector('.location-suggestions');
     const resultElm = document.querySelector('.weather__result');
     multiLocEml.innerHTML = '';
     resultElm.innerHTML = '';

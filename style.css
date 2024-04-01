@@ -91,17 +91,6 @@ body {
 .weather__search-btn {
   padding: 4px 8px;
 }
-.weather__ul {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-.weather__li + li {
-  margin-left: 8px;
-}
 .weather__result {
   font-size: 20px;
   display: flex;
@@ -163,6 +152,18 @@ body {
 .weather__error-message .error-message {
   font-size: 0.9em;
   color: rgb(246, 94, 94);
+}
+
+.location-suggestions__ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.location-suggestions__li + li {
+  margin-left: 8px;
 }
 
 #weather .weather-info-data {
