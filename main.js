@@ -144,18 +144,17 @@ class WeatherApp {
   }
 
   _renderWeatherInfos(weatherDetails) {
-    const weatherInfos = {
-      temperature: weatherDetails.main.temp,
-      location: weatherDetails.name,
-      description: weatherDetails.weather[0].description,
-      iconId: weatherDetails.weather[0].icon,
-      wind: weatherDetails.wind.speed,
-    }
+    const temperature = weatherDetails.main.temp;
+    const location = weatherDetails.name;
+    const description = weatherDetails.weather[0].description;
+    const iconId = weatherDetails.weather[0].icon;
+    const wind = weatherDetails.wind.speed;
+    
     const weatherResult = document.querySelector('.weather__result');
-    const locationHtml = this._createLocationHtml(weatherInfos.location);
-    const temperatureHtml = this._createTemperatureHtml(weatherInfos.temperature);
-    const weatherHtml = this._createWeatherHtml(weatherInfos.description, weatherInfos.iconId);
-    const windHtml = this._createWindHtml(weatherInfos.wind);
+    const locationHtml = this._createLocationHtml(location);
+    const temperatureHtml = this._createTemperatureHtml(temperature);
+    const weatherHtml = this._createWeatherHtml(description, iconId);
+    const windHtml = this._createWindHtml(wind);
 
     this._resetHtml();
     weatherResult.innerHTML = locationHtml + temperatureHtml + weatherHtml + windHtml;
