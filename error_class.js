@@ -5,7 +5,7 @@ Error.prototype.createInnerHtml = function() {
 class ClientError extends Error {
   constructor(message) {
     super(message);
-    this.name = "Client Error";
+    this.name = this.constructor.name;
   }
 
   createInnerHtml() {
@@ -16,14 +16,14 @@ class ClientError extends Error {
 class ServerError extends Error {
   constructor(message) {
     super(message);
-    this.name = "Server Error";
+    this.name = this.constructor.name;
   }
 }
 
 class ErrorNoCity extends Error {
   constructor(message) {
     super(message);
-    this.name = "No City Error";
+    this.name = this.constructor.name;
   }
 
   createInnerHtml() {
