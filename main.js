@@ -12,7 +12,7 @@ class WeatherApp {
 
     try {
       const locationDetails = await this._fetchLocationDetails(location)
-      this._checkLocationNumbers(locationDetails);
+      this._checkUniqueLocationNumbers(locationDetails);
 
     } catch (e) {
       this._resetHtml();
@@ -32,30 +32,24 @@ class WeatherApp {
     return await response.json();
   }
 
-  //もうちょっといいメソッド名がありそう
-  _checkLocationNumbers(locationDetails) {
-    if (!locationDetails.length) {
-      throw new ErrorNoCity('都市が見つかりませんでした。')
+  _checkUniqueLocationNumbers(locationDetails) {
+    const allLocations = this._getAllLocation(locationDetails);
+    const uniqueLocations = this._removeDuplicateLocations(allLocations);
+
+    if (!uniqueLocations.length) {
+      throw new ErrorNoCity('都市が見つかりませんでした。');
     }
 
-    if (locationDetails.length === 1) {
+    if (uniqueLocations.length === 1) {
       const coordinates = {
-        lat: locationDetails[0].lat,
-        lon: locationDetails[0].lon,
+        lat: uniqueLocations[0].lat,
+        lon: uniqueLocations[0].lon,
       }
+
       this._getWeather(coordinates);
-    }
 
-    if (locationDetails.length >= 2) {
-      const allLocations = this._getAllLocation(locationDetails);
-      const uniqueLocations = this._removeDuplicateLocations(allLocations);
-
-      if (uniqueLocations.length === 1) {
-        this._getWeather(uniqueLocations);
-
-      } else {
-        this._renderLocationSuggestions(uniqueLocations);
-      }
+    } else {
+      this._renderLocationSuggestions(uniqueLocations);
     }
   }
 
@@ -149,7 +143,7 @@ class WeatherApp {
     const description = weatherDetails.weather[0].description;
     const iconId = weatherDetails.weather[0].icon;
     const wind = weatherDetails.wind.speed;
-    
+
     const weatherResult = document.querySelector('.weather__result');
     const locationHtml = this._createLocationHtml(location);
     const temperatureHtml = this._createTemperatureHtml(temperature);
