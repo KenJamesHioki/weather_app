@@ -36,13 +36,14 @@ class ErrorHandler {
 
   constructor(error) {
     this.#error = error;
-    this.#catchError(this.#error);
   }
 
-  #catchError(e) {
-    console.error(e);
+  catchError(e) {
+    this.#error = e;
 
-    const errorHtml = e.createInnerHtml();
+    console.error(this.#error);
+
+    const errorHtml = this.#error.createInnerHtml();
     this.#displayError(errorHtml);
   }
 

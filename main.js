@@ -3,6 +3,7 @@
 class WeatherApp {
   constructor(locationInput) {
     this.locationInput = locationInput;
+    this.errorHandler = new ErrorHandler();
     this._init(this.locationInput);
   }
 
@@ -15,7 +16,7 @@ class WeatherApp {
 
     } catch (e) {
       this._resetHtml();
-      new ErrorHandler(e);
+      this.errorHandler.catchError(e);
 
     } finally {
       this._hideLoader();
@@ -126,7 +127,7 @@ class WeatherApp {
 
     } catch (e) {
       this._resetHtml();
-      new ErrorHandler(e);
+      this.errorHandler.catchError(e);
 
     } finally {
       this._hideLoader();
@@ -204,7 +205,6 @@ class WeatherApp {
     `;
   }
 
-  //TODOエラー系のメソッドはWeatherAppクラスから出せそう
   _throwNewError(status) {
     switch (status) {
       case 400:
