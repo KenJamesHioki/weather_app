@@ -1,64 +1,53 @@
 //TODO:変数、メソッドをプライベート化するのかが中途半端になっている。意思決定をして修正する。
 
 class WeatherApp {
-  constructor(locationInput) {
-    this.locationInput = locationInput;
+  constructor() {
     this.errorHandler = new ErrorHandler();
-    this._init(this.locationInput);
   }
 
-  async _init(location) {
-    this._displayLoader();
+  async trigger(location) {
+    this.#displayLoader();
 
     try {
-      const locationDetails = await this._fetchLocationDetails(location)
-      this._checkUniqueLocationNumbers(locationDetails);
+      const locationDetails = await this.#fetchLocationDetails(location)
+      const uniqueLocationInfos = this.#removeDuplicateLocations(locationDetails.map(location => this.#extractLocationInfo(location)));
+
+      if (!uniqueLocationInfos.length) {
+        throw new ErrorNoCity('都市が見つかりませんでした。');
+      }
+
+      if (uniqueLocationInfos.length === 1) {
+        const coordinates = {
+          lat: uniqueLocationInfos[0].lat,
+          lon: uniqueLocationInfos[0].lon,
+        }
+  
+        this.#renderWeather(coordinates);
+  
+      } else {
+        this.#renderLocationSuggestions(uniqueLocationInfos);
+      }
 
     } catch (e) {
-      this._resetHtml();
+      this.#resetHtml();
       this.errorHandler.catchError(e);
 
     } finally {
-      this._hideLoader();
+      this.#hideLoader();
     }
   }
 
-  async _fetchLocationDetails(location) {
+  async #fetchLocationDetails(location) {
     const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=10&appid=${APIKEY}`);
     if (!response.ok) {
-      this._throwNewError(response.status);
+      this.#throwNewError(response.status);
     }
 
     return await response.json();
   }
 
-  _checkUniqueLocationNumbers(locationDetails) {
-    const allLocations = this._getAllLocation(locationDetails);
-    const uniqueLocations = this._removeDuplicateLocations(allLocations);
-
-    if (!uniqueLocations.length) {
-      throw new ErrorNoCity('都市が見つかりませんでした。');
-    }
-
-    if (uniqueLocations.length === 1) {
-      const coordinates = {
-        lat: uniqueLocations[0].lat,
-        lon: uniqueLocations[0].lon,
-      }
-
-      this._getWeather(coordinates);
-
-    } else {
-      this._renderLocationSuggestions(uniqueLocations);
-    }
-  }
-
-  _getAllLocation(locationDetails) {
-    return locationDetails.map(location => this._extractLocationInfo(location));
-  }
-
   //都市の日本語名が表示可能な場合は日本語名の表示を優先し、なければ英語名を表示する
-  _extractLocationInfo(location) {
+  #extractLocationInfo(location) {
     const locationInfo = {
       name: location.name,
       lat: location.lat,
@@ -72,13 +61,13 @@ class WeatherApp {
   }
 
   //都市名が重複してAPIから返却される場合があるので、事前に重複を排除する
-  _removeDuplicateLocations(allLocations) {
+  #removeDuplicateLocations(allLocations) {
     const uniqueLocations = Array.from(new Map(allLocations.map(location => [location.name, location])));
 
     return uniqueLocations.map(location => location[1]);
   }
 
-  _renderLocationSuggestions(locations) {
+  #renderLocationSuggestions(locations) {
     const ul = document.createElement('ul');
     ul.classList.add('location-suggestions__ul');
 
@@ -94,50 +83,50 @@ class WeatherApp {
     });
 
     ul.innerHTML = liHtml;
-    this._resetHtml();
+    this.#resetHtml();
     const parentElm = document.querySelector('.location-suggestions');
     parentElm.appendChild(title);
     parentElm.appendChild(ul);
 
-    this._onSuggestedLocationClick();
+    this.#onClickSuggestedLocation();
   }
 
-  _onSuggestedLocationClick() {
+  #onClickSuggestedLocation() {
     const suggestions = document.querySelectorAll('.location-suggestions__li');
     suggestions.forEach(suggestion => {
-      suggestion.addEventListener('click', this._getWeather.bind(this, {
+      suggestion.addEventListener('click', this.#renderWeather.bind(this, {
         lat: suggestion.dataset.lat,
         lon: suggestion.dataset.lon,
       }));
     });
   }
 
-  async _getWeather(coordinates) {
-    this._displayLoader();
+  async #renderWeather(coordinates) {
+    this.#displayLoader();
 
     try {
-      const weatherDetails = await this._fetchWeatherDetails(coordinates);
-      this._renderWeatherInfos(weatherDetails);
+      const weatherDetails = await this.#fetchWeatherDetails(coordinates);
+      this.#renderWeatherInfos(weatherDetails);
 
     } catch (e) {
-      this._resetHtml();
+      this.#resetHtml();
       this.errorHandler.catchError(e);
 
     } finally {
-      this._hideLoader();
+      this.#hideLoader();
     }
   }
 
-  async _fetchWeatherDetails(coordinates) {
+  async #fetchWeatherDetails(coordinates) {
     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${coordinates.lat}&lon=${coordinates.lon}&appid=${APIKEY}&units=metric&lang=ja`);
     if (!response.ok) {
-      this._throwNewError(response.status)
+      this.#throwNewError(response.status)
     }
 
     return await response.json();
   }
 
-  _renderWeatherInfos(weatherDetails) {
+  #renderWeatherInfos(weatherDetails) {
     const temperature = weatherDetails.main.temp;
     const location = weatherDetails.name;
     const description = weatherDetails.weather[0].description;
@@ -145,16 +134,16 @@ class WeatherApp {
     const wind = weatherDetails.wind.speed;
 
     const weatherResult = document.querySelector('.weather__result');
-    const locationHtml = this._createLocationHtml(location);
-    const temperatureHtml = this._createTemperatureHtml(temperature);
-    const weatherHtml = this._createWeatherHtml(description, iconId);
-    const windHtml = this._createWindHtml(wind);
+    const locationHtml = this.#createLocationHtml(location);
+    const temperatureHtml = this.#createTemperatureHtml(temperature);
+    const weatherHtml = this.#createWeatherHtml(description, iconId);
+    const windHtml = this.#createWindHtml(wind);
 
-    this._resetHtml();
+    this.#resetHtml();
     weatherResult.innerHTML = locationHtml + temperatureHtml + weatherHtml + windHtml;
   }
 
-  _createLocationHtml(locationName) {
+  #createLocationHtml(locationName) {
     return `
     <p class="weather__result-location">
     ${locationName}の天気
@@ -162,7 +151,7 @@ class WeatherApp {
     `;
   }
 
-  _createTemperatureHtml(temperature) {
+  #createTemperatureHtml(temperature) {
     return `
     <div class="weather-info" id="temperature">
       <p class="weather-info-title">気温</p>
@@ -173,7 +162,7 @@ class WeatherApp {
     `;
   }
 
-  _createWeatherHtml(description, icon) {
+  #createWeatherHtml(description, icon) {
     return `
     <div class="weather-info" id="weather">
       <p class="weather-info-title">天気</p>
@@ -187,7 +176,7 @@ class WeatherApp {
     `;
   }
 
-  _createWindHtml(wind) {
+  #createWindHtml(wind) {
     return `
     <div class="weather-info" id="wind">
       <p class="weather-info-title">風速</p>
@@ -198,47 +187,42 @@ class WeatherApp {
     `;
   }
 
-  _throwNewError(status) {
+  #throwNewError(status) {
     switch (status) {
-      case 400:
-        throw new ClientError('エラーコード：400');
-      case 401:
-        throw new ClientError('エラーコード：401');
-      case 404:
-        throw new ClientError('エラーコード：404');
-      case 429:
-        throw new ClientError('エラーコード：429');
+      case 400, 401, 404, 429:
+        throw new ClientError(`エラーコード：${status}`);
       case 500, 502, 503, 504:
-        throw new ServerError('エラーコード：500~504');
+        throw new ServerError(`エラーコード：${status}`);
       default:
-        throw new Error('処理ができませんでした。');
+        throw new Error(`処理ができませんでした。エラーコード：${status}`);
     }
   }
 
-  _resetHtml() {
+  #resetHtml() {
     const multiLocEml = document.querySelector('.location-suggestions');
     const resultElm = document.querySelector('.weather__result');
     multiLocEml.innerHTML = '';
     resultElm.innerHTML = '';
   }
 
-  _displayLoader() {
+  #displayLoader() {
     const loader = document.querySelector('.loader');
     loader.classList.add('loading');
   }
 
-  _hideLoader() {
+  #hideLoader() {
     const loader = document.querySelector('.loader');
     loader.classList.remove('loading');
   }
 }
 
 const APIKEY = CONFIG.APIKEY;
+const weatherApp = new WeatherApp();
 
 const searchForm = document.querySelector('.weather__search-form');
 searchForm.addEventListener('submit', event => {
   const locationInput = document.querySelector('.weather__textbox').value;
   event.preventDefault();
   if (!locationInput) return;
-  new WeatherApp(locationInput);
+  weatherApp.trigger(locationInput);
 });
