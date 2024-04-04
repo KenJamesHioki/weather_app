@@ -1,12 +1,11 @@
-//TODO:変数、メソッドをプライベート化するのかが中途半端になっている。意思決定をして修正する。
-
 class WeatherApp {
   constructor() {
     this.errorHandler = new ErrorHandler();
+    this.loader = new Loader(document.querySelector('.loader'), 'loading');
   }
 
   async trigger(location) {
-    this.#displayLoader();
+    this.loader.display();
 
     try {
       const locationDetails = await this.#fetchLocationDetails(location)
@@ -33,7 +32,7 @@ class WeatherApp {
       this.errorHandler.catchError(e);
 
     } finally {
-      this.#hideLoader();
+      this.loader.hide();
     }
   }
 
@@ -102,7 +101,7 @@ class WeatherApp {
   }
 
   async #renderWeather(coordinates) {
-    this.#displayLoader();
+    this.loader.display();
 
     try {
       const weatherDetails = await this.#fetchWeatherDetails(coordinates);
@@ -113,7 +112,7 @@ class WeatherApp {
       this.errorHandler.catchError(e);
 
     } finally {
-      this.#hideLoader();
+      this.loader.hide();
     }
   }
 
@@ -199,20 +198,10 @@ class WeatherApp {
   }
 
   #resetHtml() {
-    const multiLocEml = document.querySelector('.location-suggestions');
-    const resultElm = document.querySelector('.weather__result');
-    multiLocEml.innerHTML = '';
-    resultElm.innerHTML = '';
-  }
-
-  #displayLoader() {
-    const loader = document.querySelector('.loader');
-    loader.classList.add('loading');
-  }
-
-  #hideLoader() {
-    const loader = document.querySelector('.loader');
-    loader.classList.remove('loading');
+    const locationSuggestions = document.querySelector('.location-suggestions');
+    const weatherResult = document.querySelector('.weather__result');
+    locationSuggestions.innerHTML = '';
+    weatherResult.innerHTML = '';
   }
 }
 
