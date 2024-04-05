@@ -5,7 +5,6 @@ Error.prototype.createInnerHtml = function() {
 class ClientError extends Error {
   constructor(message) {
     super(message);
-    this.name = this.constructor.name;
   }
 
   createInnerHtml() {
@@ -16,14 +15,12 @@ class ClientError extends Error {
 class ServerError extends Error {
   constructor(message) {
     super(message);
-    this.name = this.constructor.name;
   }
 }
 
-class ErrorNoCity extends Error {
+class NoCityError extends Error {
   constructor(message) {
     super(message);
-    this.name = this.constructor.name;
   }
 
   createInnerHtml() {
@@ -32,22 +29,14 @@ class ErrorNoCity extends Error {
 }
 
 class ErrorHandler {
-  #error;
+  trigger(e) {
+    console.error(e);
 
-  constructor(error) {
-    this.#error = error;
+    const errorHtml = e.createInnerHtml();
+    this.#display(errorHtml);
   }
 
-  catchError(e) {
-    this.#error = e;
-
-    console.error(this.#error);
-
-    const errorHtml = this.#error.createInnerHtml();
-    this.#displayError(errorHtml);
-  }
-
-  #displayError(errorHtml) {
+  #display(errorHtml) {
     const errorMessHtml = `
     <div class="weather__error-message">
       <p class="error-message">

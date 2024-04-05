@@ -12,7 +12,7 @@ class WeatherApp {
       const uniqueLocationInfos = this.#removeDuplicateLocations(locationDetails.map(location => this.#extractLocationInfo(location)));
 
       if (!uniqueLocationInfos.length) {
-        throw new ErrorNoCity('都市が見つかりませんでした。');
+        throw new NoCityError('都市が見つかりませんでした。');
       }
 
       if (uniqueLocationInfos.length === 1) {
@@ -20,16 +20,16 @@ class WeatherApp {
           lat: uniqueLocationInfos[0].lat,
           lon: uniqueLocationInfos[0].lon,
         }
-  
+
         this.#renderWeather(coordinates);
-  
+
       } else {
         this.#renderLocationSuggestions(uniqueLocationInfos);
       }
 
     } catch (e) {
       this.#resetHtml();
-      this.errorHandler.catchError(e);
+      this.errorHandler.trigger(e);
 
     } finally {
       this.loader.hide();
@@ -109,7 +109,7 @@ class WeatherApp {
 
     } catch (e) {
       this.#resetHtml();
-      this.errorHandler.catchError(e);
+      this.errorHandler.trigger(e);
 
     } finally {
       this.loader.hide();
@@ -188,12 +188,20 @@ class WeatherApp {
 
   #throwNewError(status) {
     switch (status) {
-      case 400, 401, 404, 429:
+      case 400:
+      case 401:
+      case 404:
+      case 429:
         throw new ClientError(`エラーコード：${status}`);
-      case 500, 502, 503, 504:
+
+      case 500:
+      case 502:
+      case 503:
+      case 504:
         throw new ServerError(`エラーコード：${status}`);
+        
       default:
-        throw new Error(`処理ができませんでした。エラーコード：${status}`);
+        throw new Error(`予期せぬエラーが発生しました。エラーコード：${status}`);
     }
   }
 
