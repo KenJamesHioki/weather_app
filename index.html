@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jay's Weather</title>
+  <link rel="stylesheet" href="vendor/reset.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="apikeys.js"></script>
+  <script src="error_class.js" defer></script>
+  <script src="loader_class.js" defer></script>
+  <script src="main.js" defer></script>
+</head>
+
+<body>
+  <div id="container">
+    <div class="loader">
+      <div class="loader__icon">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+    </div>
+    <main id="main">
+      <section class="weather">
+        <div class="weather__inner">
+          <h1 class="weather__title">天気を調べよう</h1>
+          <p class="weather__description">天気を調べたい都市名を入力してください</p>
+          <form action="" class="weather__search-form">
+            <input type="text" class="weather__textbox">
+            <button type="submit" class="btn weather__search-btn">検索</button>
+          </form>
+          <div class="location-suggestions">
+          </div>
+          <div class="weather__result">
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+
+</html>
